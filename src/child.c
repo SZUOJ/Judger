@@ -158,6 +158,11 @@ void child_process(FILE *log_fp, struct config *_config) {
                 CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
             }
         }
+        else if (strcmp("general_file_io", _config->seccomp_rule_name) == 0) {
+            if (general_file_io_seccomp_rules(_config) != SUCCESS ) {
+                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
+            }
+        }
         else if (strcmp("golang", _config->seccomp_rule_name) == 0) {
             if (golang_seccomp_rules(_config) != SUCCESS ) {
                 CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
