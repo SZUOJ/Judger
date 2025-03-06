@@ -17,7 +17,8 @@ int main(int argc, char *argv[]) {
             max_cpu_time = arg_intn(NULL, "max_cpu_time", INT_PLACE_HOLDER, 0, 1, "Max CPU Time (ms)"),
             max_real_time = arg_intn(NULL, "max_real_time", INT_PLACE_HOLDER, 0, 1, "Max Real Time (ms)"),
             max_memory = arg_intn(NULL, "max_memory", INT_PLACE_HOLDER, 0, 1, "Max Memory (byte)"),
-            memory_limit_check_only = arg_intn(NULL, "memory_limit_check_only", INT_PLACE_HOLDER, 0, 1, "only check memory usage, do not setrlimit (default False)"),
+            memory_limit_check_only = arg_intn(NULL, "memory_limit_check_only", INT_PLACE_HOLDER, 0, 1,
+                                               "only check memory usage, do not setrlimit (default False)"),
             max_stack = arg_intn(NULL, "max_stack", INT_PLACE_HOLDER, 0, 1, "Max Stack (byte, default 16M)"),
             max_process_number = arg_intn(NULL, "max_process_number", INT_PLACE_HOLDER, 0, 1, "Max Process Number"),
             max_output_size = arg_intn(NULL, "max_output_size", INT_PLACE_HOLDER, 0, 1, "Max Output Size (byte)"),
@@ -108,20 +109,20 @@ int main(int argc, char *argv[]) {
         _config.max_output_size = UNLIMITED;
     }
 
-    _config.exe_path = (char *)*exe_path->sval;
+    _config.exe_path = (char *) *exe_path->sval;
 
     if (input_path->count > 0) {
-        _config.input_path = (char *)input_path->sval[0];
+        _config.input_path = (char *) input_path->sval[0];
     } else {
         _config.input_path = "/dev/stdin";
     }
     if (output_path->count > 0) {
-        _config.output_path = (char *)output_path->sval[0];
+        _config.output_path = (char *) output_path->sval[0];
     } else {
         _config.output_path = "/dev/stdout";
     }
     if (error_path->count > 0) {
-        _config.error_path = (char *)error_path->sval[0];
+        _config.error_path = (char *) error_path->sval[0];
     } else {
         _config.error_path = "/dev/stderr";
     }
@@ -130,7 +131,7 @@ int main(int argc, char *argv[]) {
     int i = 1;
     if (args->count > 0) {
         for (; i < args->count + 1; i++) {
-            _config.args[i] = (char *)args->sval[i - 1];
+            _config.args[i] = (char *) args->sval[i - 1];
         }
     }
     _config.args[i] = NULL;
@@ -138,32 +139,30 @@ int main(int argc, char *argv[]) {
     i = 0;
     if (env->count > 0) {
         for (; i < env->count; i++) {
-            _config.env[i] = (char *)env->sval[i];
+            _config.env[i] = (char *) env->sval[i];
         }
     }
     _config.env[i] = NULL;
 
     if (log_path->count > 0) {
-        _config.log_path = (char *)log_path->sval[0];
+        _config.log_path = (char *) log_path->sval[0];
     } else {
         _config.log_path = "judger.log";
     }
     if (seccomp_rule_name->count > 0) {
-        _config.seccomp_rule_name = (char *)seccomp_rule_name->sval[0];
+        _config.seccomp_rule_name = (char *) seccomp_rule_name->sval[0];
     } else {
         _config.seccomp_rule_name = NULL;
     }
 
     if (uid->count > 0) {
-        _config.uid = (uid_t)*(uid->ival);
-    }
-    else {
+        _config.uid = (uid_t) * (uid->ival);
+    } else {
         _config.uid = 65534;
     }
-    if(gid->count > 0) {
-        _config.gid = (gid_t)*(gid->ival);
-    }
-    else {
+    if (gid->count > 0) {
+        _config.gid = (gid_t) * (gid->ival);
+    } else {
         _config.gid = 65534;
     }
 

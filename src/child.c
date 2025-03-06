@@ -1,6 +1,7 @@
 #define _DEFAULT_SOURCE
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <signal.h>
@@ -36,7 +37,7 @@ void child_process(FILE *log_fp, struct config *_config) {
 
     if (_config->max_stack != UNLIMITED) {
         struct rlimit max_stack;
-        max_stack.rlim_cur = max_stack.rlim_max = (rlim_t) (_config->max_stack);
+        max_stack.rlim_cur = max_stack.rlim_max = (rlim_t)(_config->max_stack);
         if (setrlimit(RLIMIT_STACK, &max_stack) != 0) {
             CHILD_ERROR_EXIT(SETRLIMIT_FAILED);
         }
@@ -47,7 +48,7 @@ void child_process(FILE *log_fp, struct config *_config) {
     if (_config->memory_limit_check_only == 0) {
         if (_config->max_memory != UNLIMITED) {
             struct rlimit max_memory;
-            max_memory.rlim_cur = max_memory.rlim_max = (rlim_t) (_config->max_memory) * 2;
+            max_memory.rlim_cur = max_memory.rlim_max = (rlim_t)(_config->max_memory) * 2;
             if (setrlimit(RLIMIT_AS, &max_memory) != 0) {
                 CHILD_ERROR_EXIT(SETRLIMIT_FAILED);
             }
@@ -57,7 +58,7 @@ void child_process(FILE *log_fp, struct config *_config) {
     // set cpu time limit (in seconds)
     if (_config->max_cpu_time != UNLIMITED) {
         struct rlimit max_cpu_time;
-        max_cpu_time.rlim_cur = max_cpu_time.rlim_max = (rlim_t) ((_config->max_cpu_time ) / 1000);
+        max_cpu_time.rlim_cur = max_cpu_time.rlim_max = (rlim_t)((_config->max_cpu_time + 1000) / 1000);
         if (setrlimit(RLIMIT_CPU, &max_cpu_time) != 0) {
             CHILD_ERROR_EXIT(SETRLIMIT_FAILED);
         }
@@ -75,7 +76,7 @@ void child_process(FILE *log_fp, struct config *_config) {
     // set max output size limit
     if (_config->max_output_size != UNLIMITED) {
         struct rlimit max_output_size;
-        max_output_size.rlim_cur = max_output_size.rlim_max = (rlim_t ) _config->max_output_size;
+        max_output_size.rlim_cur = max_output_size.rlim_max = (rlim_t) _config->max_output_size;
         if (setrlimit(RLIMIT_FSIZE, &max_output_size) != 0) {
             CHILD_ERROR_EXIT(SETRLIMIT_FAILED);
         }
@@ -110,8 +111,7 @@ void child_process(FILE *log_fp, struct config *_config) {
         // if outfile and error_file is the same path, we use the same file pointer
         if (_config->output_path != NULL && strcmp(_config->output_path, _config->error_path) == 0) {
             error_file = output_file;
-        }
-        else {
+        } else {
             error_file = fopen(_config->error_path, "w");
             if (error_file == NULL) {
                 // todo log
@@ -127,7 +127,8 @@ void child_process(FILE *log_fp, struct config *_config) {
 
     // set gid
     gid_t group_list[] = {_config->gid};
-    if (_config->gid != -1 && (setgid(_config->gid) == -1 || setgroups(sizeof(group_list) / sizeof(gid_t), group_list) == -1)) {
+    if (_config->gid != -1 &&
+        (setgid(_config->gid) == -1 || setgroups(sizeof(group_list) / sizeof(gid_t), group_list) == -1)) {
         CHILD_ERROR_EXIT(SETUID_FAILED);
     }
 
@@ -142,38 +143,32 @@ void child_process(FILE *log_fp, struct config *_config) {
             if (c_cpp_seccomp_rules(_config) != SUCCESS) {
                 CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
             }
-        }
-        else if (strcmp("c_cpp_asan", _config->seccomp_rule_name) == 0) {
+        } else if (strcmp("c_cpp_asan", _config->seccomp_rule_name) == 0) {
             if (c_cpp_asan_seccomp_rules(_config) != SUCCESS) {
                 CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
             }
-        }
-        else if (strcmp("c_cpp_file_io", _config->seccomp_rule_name) == 0) {
+        } else if (strcmp("c_cpp_file_io", _config->seccomp_rule_name) == 0) {
             if (c_cpp_file_io_seccomp_rules(_config) != SUCCESS) {
                 CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
             }
-        }
-        else if (strcmp("general", _config->seccomp_rule_name) == 0) {
-            if (general_seccomp_rules(_config) != SUCCESS ) {
+        } else if (strcmp("general", _config->seccomp_rule_name) == 0) {
+            if (general_seccomp_rules(_config) != SUCCESS) {
+                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
+            }
+        } else if (strcmp("general_file_io", _config->seccomp_rule_name) == 0) {
+            if (general_file_io_seccomp_rules(_config) != SUCCESS) {
+                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
+            }
+        } else if (strcmp("golang", _config->seccomp_rule_name) == 0) {
+            if (golang_seccomp_rules(_config) != SUCCESS) {
+                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
+            }
+        } else if (strcmp("node", _config->seccomp_rule_name) == 0) {
+            if (node_seccomp_rules(_config) != SUCCESS) {
                 CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
             }
         }
-        else if (strcmp("general_file_io", _config->seccomp_rule_name) == 0) {
-            if (general_file_io_seccomp_rules(_config) != SUCCESS ) {
-                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
-            }
-        }
-        else if (strcmp("golang", _config->seccomp_rule_name) == 0) {
-            if (golang_seccomp_rules(_config) != SUCCESS ) {
-                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
-            }
-        }
-        else if (strcmp("node", _config->seccomp_rule_name) == 0) {
-            if (node_seccomp_rules(_config) != SUCCESS ) {
-                CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
-            }
-        }
-        // other rules
+            // other rules
         else {
             // rule does not exist
             CHILD_ERROR_EXIT(LOAD_SECCOMP_FAILED);
