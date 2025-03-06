@@ -57,7 +57,7 @@ void child_process(FILE *log_fp, struct config *_config) {
     // set cpu time limit (in seconds)
     if (_config->max_cpu_time != UNLIMITED) {
         struct rlimit max_cpu_time;
-        max_cpu_time.rlim_cur = max_cpu_time.rlim_max = (rlim_t) ((_config->max_cpu_time + 1000) / 1000);
+        max_cpu_time.rlim_cur = max_cpu_time.rlim_max = (rlim_t) ((_config->max_cpu_time ) / 1000);
         if (setrlimit(RLIMIT_CPU, &max_cpu_time) != 0) {
             CHILD_ERROR_EXIT(SETRLIMIT_FAILED);
         }
