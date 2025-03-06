@@ -11,6 +11,13 @@ int kill_pid(pid_t pid) {
 }
 
 
+// time limit should be at least 1000ms
+int get_timeout(int timeout){
+    if (timeout < 1000) return 1000;
+    return timeout;
+}
+
+
 void *timeout_killer(void *timeout_killer_args) {
     // this is a new thread, kill the process if timeout
     pid_t pid = ((struct timeout_killer_args *)timeout_killer_args)->pid;
@@ -22,7 +29,7 @@ void *timeout_killer(void *timeout_killer_args) {
     }
     // usleep can't be used, for time args must < 1000ms
     // this may sleep longer that expected, but we will have a check at the end
-    if (sleep((unsigned int)((timeout + 1000) / 1000)) != 0) {
+    if (sleep((unsigned int)(get_timeout(timeout) / 1000)) != 0) {
         kill_pid(pid);
         return NULL;
     }
