@@ -55,6 +55,7 @@ def run(max_cpu_time,
         value = vars()[var]
         if not isinstance(value, list):
             raise ValueError("{} must be a list".format(var))
+        value = list(dict.fromkeys(value))
         for item in value:
             if not isinstance(item, str):
                 raise ValueError("{} item must be a string".format(var))
