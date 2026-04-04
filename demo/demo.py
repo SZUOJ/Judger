@@ -1,11 +1,11 @@
-import _judger
+import judger
 import os
 
 if os.system("gcc main.c -o main"):
     print("compile error")
     exit(1)
 
-ret = _judger.run(max_cpu_time=1000,
+ret = judger.run(max_cpu_time=1000,
                   max_real_time=2000,
                   max_memory=128 * 1024 * 1024,
                   max_process_number=200,
