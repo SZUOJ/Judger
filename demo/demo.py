@@ -6,7 +6,7 @@ if os.system("gcc main.c -o main"):
     exit(1)
 
 ret = judger.run(max_cpu_time=1000,
-                  max_real_time=2000,
+                  max_real_time=1000,
                   max_memory=128 * 1024 * 1024,
                   max_process_number=200,
                   max_output_size=10000,

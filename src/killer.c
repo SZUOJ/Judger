@@ -1,8 +1,9 @@
-#define _POSIX_SOURCE
+#define _POSIX_C_SOURCE 200809L
 
 #include <pthread.h>
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 
 #include "killer.h"
 
@@ -21,12 +22,24 @@ void *timeout_killer(void *timeout_killer_args) {
         kill_pid(pid);
         return NULL;
     }
-    // usleep can't be used, for time args must < 1000ms
-    // this may sleep longer that expected, but we will have a check at the end
-    if (sleep((unsigned int) ((timeout + 1000) / 1000)) != 0) {
+
+
+    // sleep for timeout + 100ms
+    struct timespec req;
+    req.tv_sec = (timeout + 100) / 1000;
+    req.tv_nsec = (long)((timeout + 100) % 1000) * 1000000L;
+    if (nanosleep(&req, NULL) != 0) {
         kill_pid(pid);
         return NULL;
     }
+
+    // 之前的时限太宽了, 换成nanosleep只多运行100ms
+    // // usleep can't be used, for time args must < 1000ms
+    // // this may sleep longer that expected, but we will have a check at the end
+    // if (sleep((unsigned int) ((timeout + 1000) / 1000)) != 0) {
+    //     kill_pid(pid);
+    //     return NULL;
+    // }
     if (kill_pid(pid) != 0) {
         return NULL;
     }

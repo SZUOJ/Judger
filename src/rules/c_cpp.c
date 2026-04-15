@@ -58,6 +58,7 @@ int _c_cpp_seccomp_rules(struct config *_config, bool allow_write_file) {
     }
 
     if (allow_write_file) {
+        // 允许写文件
         if (seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 0) != 0) {
             return LOAD_SECCOMP_FAILED;
         }
@@ -74,6 +75,10 @@ int _c_cpp_seccomp_rules(struct config *_config, bool allow_write_file) {
             return LOAD_SECCOMP_FAILED;
         }
     } else {
+        // 不允许写, 也不允许读    
+        // 只允许 O_RDONLY；不允许 O_CREAT/O_TRUNC/O_WRONLY/O_RDWR
+
+
         // do not allow "w" and "rw"
         if (seccomp_rule_add(ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 1, SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0)) != 0) {
             return LOAD_SECCOMP_FAILED;
